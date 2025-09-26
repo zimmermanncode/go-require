@@ -1,0 +1,18 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.go"
+      run: go fmt {staged_files}
+    
+    vet:
+      glob: "*.go"
+      run: go vet ./...
+    
+    tidy:
+      glob: "go.mod"
+      run: go mod tidy
+    
+    lint:
+      glob: "*.go"
+      run: golangci-lint run --fix {staged_files}
