@@ -1,0 +1,30 @@
+name: Lint & format
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Setup Go environment
+      uses: actions/setup-go@v6
+      with:
+        go-version: 1.25.1
+
+    - name: Run go mod tidy
+      run: go mod tidy
+
+    - name: Install & run golangci-lint
+      uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # v8
+      with:
+        version: latest
+        install-mode: "goinstall"
+        args: --fix
