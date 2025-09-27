@@ -1,0 +1,24 @@
+name: Lint & format
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+
+    - name: Setup Go environment
+      uses: actions/setup-go@v6
+      with:
+        go-version: 1.25.1
+
+    - name: Install & run golangci-lint
+      uses: golangci/golangci-lint-action@v8
+      with:
+        version: latest
+        install-mode: "goinstall"
+        args: --fix
