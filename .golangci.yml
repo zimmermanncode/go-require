@@ -1,0 +1,15 @@
+version: '2'
+linters: 
+  disable:
+    - wsl # <-- Auto-switches to wsl_v5.
+
+  settings: 
+    depguard: 
+      rules: 
+        main:
+          list-mode: strict
+          allow:
+            - $gostd
+            - github.com/samber/lo
+            - github.com/stretchr/testify
+            - github.com/zimmermanncode/go-require

@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package require provides runtime Go assertions w/ descriptive panics & a fluent API.
 package require
 
 import (
@@ -30,6 +31,7 @@ import (
 //	// if not nil => panic: assertion failed: My value should be a nil pointer
 func NilPtr[T any](name string, value *T) *T {
 	lo.Assertf(value == nil, "%s should be a nil pointer", name)
+
 	return value
 }
 
@@ -42,5 +44,6 @@ func NilPtr[T any](name string, value *T) *T {
 //	// if nil => panic: assertion failed: My value should not be a nil pointer
 func NotNilPtr[T any](name string, value *T) *T {
 	lo.Assertf(value != nil, "%s should not be a nil pointer", name)
+
 	return value
 }
