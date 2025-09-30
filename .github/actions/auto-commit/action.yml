@@ -1,0 +1,42 @@
+name: Auto-commit changes
+description: Composite action for auto-committing changes made by jobs
+outputs:
+  changes-detected:
+    description: Whether changes were detected & committed
+    value: ${{ steps.auto_commit.outputs.changes_detected }}
+
+  commit-hash:
+    description: SHA hash of the auto-commit
+    value: ${{ steps.auto_commit.outputs.commit_hash }}
+
+runs:
+  using: composite
+  steps:
+    - name: Auto-commit changes made by job
+      id: auto_commit
+      if: github.event_name == 'pull_request'
+      uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
+      with:
+        commit_message: Auto-fix from ${{ github.workflow }} / ${{ github.job }} job
+        status_options: --untracked-files=no
+
+    - name: Comment on PR about the auto-commit
+      if: github.event_name == 'pull_request' && steps.auto_commit.outputs.changes_detected == 'true'
+      uses: actions/github-script@v8
+      with:
+        script: |
+            const repositoryUrl = '${{ github.server_url }}/${{ github.repository }}'
+
+            await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `
+            **Auto-fix applied from ${{ github.workflow }}** / \`${{ github.job }}\` job
+
+            * Workflow run: ${repositoryUrl}/actions/runs/${{ github.run_id }}
+            * Fix commit: ${repositoryUrl}/commit/${{ steps.auto_commit.outputs.commit_hash }}
+
+            @${{ github.event.pull_request.user.login }}: `
+            + 'Please check the auto-changes, pull them, squash commits, & force-push to continue the PR review ...'
+            })

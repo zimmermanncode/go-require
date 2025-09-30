@@ -1,18 +1,24 @@
-name: Lint & format
+name: Linting
 on:
   push:
   pull_request:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   lint:
+    name: Lint w/ golangci-lint ${{ github.event_name == 'pull_request' && '(auto-fix) & reviewdog' || '' }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
     - uses: actions/checkout@v5
       with:
         fetch-depth: 0
+        submodules: recursive
+
+        # Avoid merge commits when auto-committing fixes ...
+        ref: ${{ github.head_ref || github.ref }}
 
     - name: Setup Go environment
       uses: actions/setup-go@v6
@@ -20,11 +26,30 @@ jobs:
         go-version: 1.25.1
 
     - name: Run go mod tidy
-      run: go mod tidy
+      run: |
+          go mod tidy
 
     - name: Install & run golangci-lint
+      if: github.event_name == 'push'
       uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # v8
       with:
+        install-mode: goinstall
         version: latest
-        install-mode: "goinstall"
-        args: --fix
+        args: --default all # ${{ github.event_name == 'pull_request' && '--fix' || '' }}
+
+    - name: Install & run golangci-lint w/ reviewdog
+      if: github.event_name == 'pull_request'
+      uses: reviewdog/action-golangci-lint@f9bba13753278f6a73b27a56a3ffb1bfda90ed71 # v2.8.0
+      with:
+        golangci_lint_flags: --default all --fix
+
+        reporter: github-pr-review
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        filter_mode: file
+        level: error
+        fail_level: any
+        cache: false
+
+    - name: Auto-commit lint fixes
+      if: github.event_name == 'pull_request' && (success() || failure())  # (golangci-lint succeeds when all is auto-fixed)
+      uses: ./.github/actions/auto-commit

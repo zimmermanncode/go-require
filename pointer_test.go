@@ -1,61 +1,72 @@
-package require
+package require_test
 
 import (
 	"testing"
 
 	assert "github.com/stretchr/testify/assert"
+	"github.com/zimmermanncode/go-require"
 )
 
 func TestNilPtr(t *testing.T) {
+	t.Parallel()
 	t.Run("should accept nil pointer & return nil", func(t *testing.T) {
-		var nilPtr *int
-		assert.Nil(t, NilPtr("Test pointer", nilPtr))
+		t.Parallel()
+		assert.Nil(t, require.NilPtr("Test pointer", (*int)(nil)))
 	})
 	t.Run("should panic when pointer is not nil", func(t *testing.T) {
+		value := "test"
+
+		t.Parallel()
 		assert.PanicsWithValue(t, "assertion failed: Test pointer should be a nil pointer", func() {
-			value := "test"
-			NilPtr("Test pointer", &value)
+			require.NilPtr("Test pointer", &value)
 		})
 	})
 	t.Run("should use given name in panic message", func(t *testing.T) {
-		assert.PanicsWithValue(t, "assertion failed: Other pointer should be a nil pointer", func() {
-			value := 42
-			NilPtr("Other pointer", &value)
+		value := 42
+
+		t.Parallel()
+		assert.PanicsWithValue(t, "assertion failed: Other value should be a nil pointer", func() {
+			require.NilPtr("Other value", &value)
 		})
 	})
 }
 
 func TestNotNilPtr(t *testing.T) {
+	t.Parallel()
 	t.Run("should accept not-nil pointer & return same pointer", func(t *testing.T) {
 		value := 42
-		assert.Same(t, &value, NotNilPtr("Test pointer", &value))
+
+		t.Parallel()
+		assert.Same(t, &value, require.NotNilPtr("Test pointer", &value))
 	})
 	t.Run("should panic when pointer is nil", func(t *testing.T) {
+		t.Parallel()
 		assert.PanicsWithValue(t, "assertion failed: Test pointer should not be a nil pointer", func() {
-			var nilPtr *string
-			NotNilPtr("Test pointer", nilPtr)
+			require.NotNilPtr("Test pointer", (*string)(nil))
 		})
 	})
 	t.Run("should use given name in panic message", func(t *testing.T) {
-		assert.PanicsWithValue(t, "assertion failed: Other pointer should not be a nil pointer", func() {
-			var nilPtr *float64
-			NotNilPtr("Other pointer", nilPtr)
+		t.Parallel()
+		assert.PanicsWithValue(t, "assertion failed: Other value should not be a nil pointer", func() {
+			require.NotNilPtr("Other value", (*float64)(nil))
 		})
 	})
 }
 
 func BenchmarkNilPtr(b *testing.B) {
-	var nilPtr *int
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		NilPtr("Benchmark pointer", nilPtr)
+
+	for range b.N {
+		require.NilPtr("Benchmark pointer", (*int)(nil))
 	}
 }
 
 func BenchmarkNotNilPtr(b *testing.B) {
 	value := "benchmark"
+
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		NotNilPtr("Benchmark pointer", &value)
+
+	for range b.N {
+		require.NotNilPtr("Benchmark pointer", &value)
 	}
 }
