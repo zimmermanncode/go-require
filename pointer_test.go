@@ -3,7 +3,7 @@ package require_test
 import (
 	"testing"
 
-	assert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"github.com/zimmermanncode/go-require"
 )
 
