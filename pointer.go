@@ -19,7 +19,7 @@ limitations under the License.
 package require
 
 import (
-	lo "github.com/samber/lo"
+	"github.com/samber/lo"
 )
 
 // NilPtr asserts that the given value is a nil pointer & returns it on success.
