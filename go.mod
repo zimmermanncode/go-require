@@ -3,7 +3,7 @@ module github.com/zimmermanncode/go-require
 go 1.24.0
 
 require (
-	github.com/samber/lo v1.51.0
+	github.com/samber/lo v1.52.0
 	github.com/stretchr/testify v1.11.1
 )
 
